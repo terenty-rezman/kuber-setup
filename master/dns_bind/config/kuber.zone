@@ -1,0 +1,15 @@
+$TTL 2d
+
+$ORIGIN kuber.home.
+
+@             IN     SOA    ns.kuber.home. info.kuber.home (
+                            2022121900     ; serial
+                            12h            ; refresh
+                            15m            ; retry
+                            3w             ; expire
+                            2h )           ; minimum TTL
+
+
+@            IN     NS     master
+master       IN     A      192.168.177.1
+worker1      IN     A      192.168.177.2

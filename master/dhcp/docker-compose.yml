@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  isp-dhcp:
+    container_name: isp-dhcp
+    image: networkboot/dhcpd 
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    network_mode: "host"
+    command: enp0s8
