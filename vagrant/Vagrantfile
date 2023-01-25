@@ -1,0 +1,40 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+$script = <<-SCRIPT
+echo installing pip
+sudo apt update
+yes | apt install pip
+echo installing kubespray
+cd 
+git clone https://github.com/kubernetes-sigs/kubespray.git
+cd kubespray
+pip install -r requirements.txt
+SCRIPT
+
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/ubuntu2004"
+  config.disksize.size = "20GB"
+  config.vm.network "public_network", bridge: "BRIDGE"
+  config.vm.network "private_network", ip: "192.168.177.2"
+  config.vm.define "master"
+  config.vm.hostname = "master"
+
+  # fix for wsl
+  # https://github.com/hashicorp/vagrant/issues/8604
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
+  end
+
+  config.vm.provider :hyperv do |v, override|
+    v.enable_virtualization_extensions = true
+    v.linked_clone = true
+    v.vmname = "master"
+    v.maxmemory = 1024
+    v.memory = 1024
+    v.cpus = 1
+  end
+
+  config.vm.provision "shell", inline: $script
+end
