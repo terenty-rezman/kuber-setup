@@ -3,6 +3,9 @@
 - hosts: [localhost, all]
   connection: local
   become: yes
+  roles: 
+    - kwoodson.yedit
+
   tasks:
     - name: Update and upgrade apt packages
       become: true
@@ -47,12 +50,30 @@
         groups: docker
         append: yes
 
+    - name: check if repo already cloned
+      stat:
+        path: /home/vagrant/kuber-setup
+      register: already_cloned
+
     - name: clone kuber-setup repo
       git:
         repo: https://github.com/terenty-rezman/kuber-setup.git
         dest: /home/vagrant/kuber-setup
         clone: yes
         update: yes
+      when: not already_cloned.stat.exists
+
+    - name: deploy isc dhcp
+      shell: |
+        docker compose up -d
+      args:
+       chdir: /home/vagrant/kuber-setup/master/dhcp
+
+    - name: pull dns bind image
+      shell: |
+        docker compose pull
+      args:
+       chdir: /home/vagrant/kuber-setup/master/dns_bind
 
     - name: Disable systemd-resolved
       systemd:
@@ -66,3 +87,11 @@
         docker compose up -d
       args:
        chdir: /home/vagrant/kuber-setup/master/dns_bind
+
+    # ansible-galaxy install kwoodson.yedit
+    # https://github.com/kwoodson/ansible-role-yedit
+    - name: add search domain to netplan config
+      yedit:
+        src: /etc/netplan/01-netcfg.yaml
+        key: network.ethernets.eth0.nameservers.search
+        value: [kuber.home]

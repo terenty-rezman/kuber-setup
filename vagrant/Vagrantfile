@@ -5,44 +5,57 @@
 $script = <<-SCRIPT
 echo installing pip
 sudo apt update
-yes | apt install pip
+yes | sudo apt install pip
 echo installing kubespray
-su vagrant
 cd 
 git clone https://github.com/kubernetes-sigs/kubespray.git
 cd kubespray
 pip install -r requirements.txt
-ansible-galaxy collection install community.docker
+export PATH=/home/vagrant/.local/bin:$PATH
+mkdir -p /home/vagrant/.ansible/roles
+cd /home/vagrant/.ansible/roles
+ansible-galaxy install kwoodson.yedit
 SCRIPT
 
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "generic/ubuntu2004"
-  config.disksize.size = "20GB"
 
-  config.vm.network "private_network", ip: "192.168.177.1", virtualbox__intnet: "kuber_internal"
+  config.vm.define "master" do |master|
+    master.vm.box = "generic/ubuntu2004"
+    master.disksize.size = "20GB"
 
-  config.vm.define "master"
-  config.vm.hostname = "master"
+    master.vm.hostname = "master"
+    master.vm.network "private_network", ip: "192.168.177.1", virtualbox__intnet: "kuber_internal"
 
-  # fix for wsl
-  # https://github.com/hashicorp/vagrant/issues/8604
-  # config.vm.provider "virtualbox" do |vb|
-  #  vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
-  # end
+    master.vm.provider :virtualbox do |v, override|
+      v.name = "master"
+      v.memory = 1024
+      v.cpus = 1
+    end
 
-  config.vm.provider :virtualbox do |v, override|
-    v.name = "master"
-    v.memory = 1024
-    v.cpus = 1
+    master.vm.synced_folder ".", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+
+    master.vm.provision "shell", inline: $script, privileged: false
+
+    master.vm.provision "ansible_local" do |ansible|
+      ansible.install = false
+      ansible.playbook = "prepare_master.yaml"
+    end
   end
 
-  config.vm.synced_folder ".", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+  config.vm.define "control1" do |control1|
+    control1.vm.box = "generic/ubuntu2004"
+    control1.disksize.size = "20GB"
 
-  config.vm.provision "shell", inline: $script
+    control1.vm.hostname = "control1"
+    control1.vm.network "private_network", type: "dhcp", virtualbox__intnet: "kuber_internal",
+      mac: "08002721ee3f"
 
-  config.vm.provision "ansible_local" do |ansible|
-    ansible.install = false
-    ansible.playbook = "prepare_master.yaml"
+    control1.vm.provider :virtualbox do |v, override|
+      v.name = "control1"
+      v.memory = 2048
+      v.cpus = 2
+    end
   end
+
 end
