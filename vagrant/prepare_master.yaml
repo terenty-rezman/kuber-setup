@@ -1,0 +1,68 @@
+
+---
+- hosts: [localhost, all]
+  connection: local
+  become: yes
+  tasks:
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+
+    - name: Install required packages
+      apt:
+        pkg:
+          - git
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: latest
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: yes
+
+    - name: Install docker compose
+      apt:
+        name: docker-compose-plugin
+        state: latest
+
+    - name: adding existing user 'vagrant' to group sudo
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+
+    - name: clone kuber-setup repo
+      git:
+        repo: https://github.com/terenty-rezman/kuber-setup.git
+        dest: /home/vagrant/kuber-setup
+        clone: yes
+        update: yes
+
+    - name: Disable systemd-resolved
+      systemd:
+       name: systemd-resolved
+       state: stopped
+       enabled: no
+       masked: yes
+
+    - name: deploy dns bind 
+      shell: |
+        docker compose up -d
+      args:
+       chdir: /home/vagrant/kuber-setup/master/dns_bind
