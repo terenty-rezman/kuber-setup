@@ -58,4 +58,19 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  config.vm.define "worker1" do |worker|
+    worker.vm.box = "generic/ubuntu2004"
+    worker.disksize.size = "20GB"
+
+    worker.vm.hostname = "worker1"
+    worker.vm.network "private_network", type: "dhcp", virtualbox__intnet: "kuber_internal",
+      mac: "080027afeffa"
+
+    worker.vm.provider :virtualbox do |v, override|
+      v.name = "worker1"
+      v.memory = 2048
+      v.cpus = 2
+    end
+  end
+
 end

@@ -109,3 +109,13 @@
 
     #- name: apply netplan
       #shell: sudo netplan apply
+
+    - name: copy kubespray inventory.ini
+      ansible.builtin.copy:
+        src: /home/vagrant/kuber-setup/master/kubespray/inventory.ini
+        dest: /home/vagrant/kubespray/inventory/cluster/inventory.ini
+
+    - name: install kubespray
+      shell: |
+        ansible-playbook -i inventory/cluster/inventory.ini cluster.yml
+      chdir: /home/vagrant/kubespray/inventory/cluster
