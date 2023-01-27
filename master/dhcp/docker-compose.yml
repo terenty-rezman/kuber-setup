@@ -8,4 +8,4 @@ services:
       - ./data:/data
     restart: unless-stopped
     network_mode: "host"
-    command: enp0s8
+    command: eth1

@@ -95,3 +95,7 @@
         src: /etc/netplan/01-netcfg.yaml
         key: network.ethernets.eth0.nameservers.search
         value: [kuber.home]
+
+    - name: apply netplan
+      shell: |
+        netplan apply
