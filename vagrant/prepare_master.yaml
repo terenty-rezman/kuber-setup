@@ -16,6 +16,7 @@
     - name: Install required packages
       apt:
         pkg:
+          - sshpass
           - git
           - ca-certificates
           - curl
@@ -113,9 +114,12 @@
     - name: copy kubespray inventory.ini
       ansible.builtin.copy:
         src: /home/vagrant/kuber-setup/master/kubespray/inventory.ini
-        dest: /home/vagrant/kubespray/inventory/cluster/inventory.ini
+        dest: /home/vagrant/kubespray/inventory/inventory.ini
 
-    - name: install kubespray
-      shell: |
-        ansible-playbook -i inventory/cluster/inventory.ini cluster.yml
-      chdir: /home/vagrant/kubespray/inventory/cluster
+          #- name: install kubespray
+          #become: true
+          #become_user: vagrant
+          #shell: |
+          #ansible-playbook -i inventory/inventory.ini --become cluster.yml &>1 | tee /tmp/kuberspray.log
+          #args:
+          #chdir: /home/vagrant/kubespray
