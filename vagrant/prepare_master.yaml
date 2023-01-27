@@ -75,12 +75,18 @@
       args:
        chdir: /home/vagrant/kuber-setup/master/dns_bind
 
-    - name: Disable systemd-resolved
+    # https://tekanaid.com/posts/create-a-pihole-docker-ad-blocker-with-ansible-and-terraform
+    - name: Disable Stub Resolver
+      replace:
+        path: /etc/systemd/resolved.conf
+        regexp: '#*DNSStubListener=yes'
+        replace: 'DNSStubListener=no'
+
+    - name: Restart systemd-resolved
       systemd:
-       name: systemd-resolved
-       state: stopped
-       enabled: no
-       masked: yes
+        state: restarted
+        name: systemd-resolved
+        daemon_reload: yes
 
     - name: deploy dns bind 
       shell: |
@@ -88,14 +94,18 @@
       args:
        chdir: /home/vagrant/kuber-setup/master/dns_bind
 
+    - name: custom resolv.conf
+      shell: |
+        rm /etc/resolv.conf
+        ln -s /home/vagrant/kuber-setup/master/etc/resolv.conf /etc/resolv.conf
+
     # ansible-galaxy install kwoodson.yedit
     # https://github.com/kwoodson/ansible-role-yedit
-    - name: add search domain to netplan config
-      yedit:
-        src: /etc/netplan/01-netcfg.yaml
-        key: network.ethernets.eth0.nameservers.search
-        value: [kuber.home]
+    #- name: add search domain to netplan config
+    #  yedit:
+    #    src: /etc/netplan/01-netcfg.yaml
+    #    key: network.ethernets.eth0.nameservers.search
+    #    value: [kuber.home]
 
-    - name: apply netplan
-      shell: |
-        netplan apply
+    #- name: apply netplan
+      #shell: sudo netplan apply
