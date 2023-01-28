@@ -1,0 +1,96 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# clone kubespray and install ansible for its requirements
+$script = <<-SCRIPT
+echo installing pip
+sudo apt update
+yes | sudo apt install pip
+
+echo cloning kubespray...
+cd 
+git clone https://github.com/kubernetes-sigs/kubespray.git
+
+echo installing ansible form kubespray requirements...
+cd kubespray
+pip install -r requirements.txt
+
+echo configuring env for ansible to work...
+export PATH=/home/vagrant/.local/bin:$PATH
+mkdir -p /home/vagrant/.ansible/roles
+
+echo installing additional modules for ansible
+cd /home/vagrant/.ansible/roles
+ansible-galaxy install kwoodson.yedit
+
+SCRIPT
+
+# add new nodes to add more nodes to the cluster
+nodes = [
+    {
+        name: 'control1',
+        groups: ['kube_control_plane', 'etcd']
+    },
+    {
+        name: 'worker1',
+        groups: ['kube_node']
+    }
+]
+
+# generate ip for each node
+nodes.each_with_index do |node, idx|
+  ip = "192.168.177." + (2 + idx).to_s
+  node[:ip] = ip
+end
+
+
+Vagrant.configure("2") do |config|
+  nodes.each_with_index do |node, idx|
+    vm_name = node[:name]
+    ip = node[:ip]
+
+    config.vm.define vm_name do |n|
+      n.vm.box = "generic/ubuntu2004"
+      n.disksize.size = "20GB"
+
+      n.vm.hostname = vm_name
+      n.vm.network "private_network", ip: ip, virtualbox__intnet: "kuber_internal"
+
+      # additional safety
+      n.vm.synced_folder ".", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+
+      n.vm.provider "virtualbox" do |v, override|
+        v.name = vm_name
+        v.memory = 2048
+        v.cpus = 2
+      end
+    end
+  end
+
+  config.vm.define "master" do |master|
+    master.vm.box = "generic/ubuntu2004"
+    master.disksize.size = "20GB"
+
+    master.vm.hostname = "master"
+    master.vm.network "private_network", ip: "192.168.177.1", virtualbox__intnet: "kuber_internal"
+
+    master.vm.provider :virtualbox do |v, override|
+      v.name = "master"
+      v.memory = 1024
+      v.cpus = 1
+    end
+
+    master.vm.synced_folder ".", "/vagrant", SharedFoldersEnableSymlinksCreate: false
+
+    master.vm.provision "shell", inline: $script, privileged: false
+
+    master.vm.provision "ansible_local" do |ansible|
+      ansible.host_vars
+    
+      # ansible is installed by shell script above
+      ansible.install = false
+      ansible.playbook = "prepare_master.yaml"
+    end
+  end
+
+end

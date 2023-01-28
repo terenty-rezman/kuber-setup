@@ -1,0 +1,54 @@
+
+---
+- hosts: [localhost, all]
+  connection: local
+  become: yes
+
+  tasks:
+    - name: Update and upgrade apt packages
+      become: true
+      apt:
+        update_cache: yes
+        cache_valid_time: 86400 #One day
+
+    - name: Install required packages
+      apt:
+        pkg:
+          - sshpass
+          - git
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: latest
+
+    - name: check if repo already cloned
+      stat:
+        path: /home/vagrant/kuber-setup
+      register: already_cloned
+
+    # - name: clone kuber-setup repo
+    #   git:
+    #     repo: https://github.com/terenty-rezman/kuber-setup.git
+    #     dest: /home/vagrant/kuber-setup
+    #     clone: yes
+    #     update: yes
+    #   when: not already_cloned.stat.exists
+
+    - name: create inventory.ini for kubespray
+      template:
+        src: /home/vagrant/kuber-setup/master/kubespray/inventory.j2
+        dest: /home/vagrant/kubespray/inventory/inventory.ini
+
+    - name: copy kubespray inventory.ini
+      ansible.builtin.copy:
+        src: /home/vagrant/kuber-setup/master/kubespray/inventory.ini
+        dest: /home/vagrant/kubespray/inventory/inventory.ini
+
+    # - name: install kubespray
+    #   become: true
+    #   become_user: vagrant
+    #   shell: |
+    #     ansible-playbook -i inventory/inventory.ini --become cluster.yml &>1 | tee /tmp/kuberspray.log
+    #   args:
+    #     chdir: /home/vagrant/kubespray
