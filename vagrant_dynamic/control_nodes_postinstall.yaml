@@ -8,9 +8,9 @@
       become: true
       become_user: vagrant
       shell: |
-        mkdir -p /home/$USER/.kube
+        mkdir -p /home/vagrant/.kube
         sudo cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
-        sudo chown $USER:$USER /home/$USER/.kube/config
+        sudo chown vagrant:vagrant /home/vagrant/.kube/config
 
     - name: Add serve alias for foo user
       ansible.builtin.lineinfile:
