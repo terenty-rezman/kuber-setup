@@ -5,12 +5,10 @@
 
   tasks:
     - name: Setup kubeconfig for user
-      become: true
-      become_user: vagrant
       shell: |
         mkdir -p /home/vagrant/.kube
-        sudo cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
-        sudo chown vagrant:vagrant /home/vagrant/.kube/config
+        cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
+        chown vagrant:vagrant /home/vagrant/.kube/config
 
     - name: Add serve alias for foo user
       ansible.builtin.lineinfile:
