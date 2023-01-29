@@ -44,6 +44,14 @@
         src: /home/vagrant/kuber-setup/master/etc/hosts.j2
         dest: /etc/hosts
 
+    - name: play ansible playbook on nodes to prepare them
+      become: true
+      become_user: vagrant
+      shell: |
+        ansible-playbook -i /home/vagrant/kubespray/inventory/inventory.ini --become prepare_nodes.yml 
+      args:
+        chdir: /home/vagrant/kuber-setup/vagrant_dynamic
+
     # - name: install kubespray
     #   become: true
     #   become_user: vagrant
