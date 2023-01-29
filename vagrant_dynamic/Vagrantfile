@@ -43,6 +43,8 @@ nodes.each_with_index do |node, idx|
   node[:ip] = ip
 end
 
+host_vars = {}
+
 
 Vagrant.configure("2") do |config|
   nodes.each_with_index do |node, idx|
@@ -84,8 +86,10 @@ Vagrant.configure("2") do |config|
 
     master.vm.provision "shell", inline: $script, privileged: false
 
+    host_vars[:nodes] = nodes
+
     master.vm.provision "ansible_local" do |ansible|
-      ansible.host_vars
+      ansible.host_vars = host_vars
     
       # ansible is installed by shell script above
       ansible.install = false

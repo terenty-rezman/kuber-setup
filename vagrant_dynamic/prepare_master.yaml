@@ -27,13 +27,13 @@
         path: /home/vagrant/kuber-setup
       register: already_cloned
 
-    # - name: clone kuber-setup repo
-    #   git:
-    #     repo: https://github.com/terenty-rezman/kuber-setup.git
-    #     dest: /home/vagrant/kuber-setup
-    #     clone: yes
-    #     update: yes
-    #   when: not already_cloned.stat.exists
+    - name: clone kuber-setup repo
+      git:
+        repo: https://github.com/terenty-rezman/kuber-setup.git
+        dest: /home/vagrant/kuber-setup
+        clone: yes
+        update: yes
+      when: not already_cloned.stat.exists
 
     - name: create inventory.ini for kubespray
       template:
