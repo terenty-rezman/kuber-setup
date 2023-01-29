@@ -34,6 +34,10 @@ nodes = [
     {
         name: 'worker1',
         groups: ['kube_node']
+    },
+    {
+        name: 'worker2',
+        groups: ['kube_node']
     }
 ]
 

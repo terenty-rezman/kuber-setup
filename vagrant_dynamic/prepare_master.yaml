@@ -52,10 +52,10 @@
       args:
         chdir: /home/vagrant/kuber-setup/vagrant_dynamic
 
-    # - name: install kubespray
-    #   become: true
-    #   become_user: vagrant
-    #   shell: |
-    #     ansible-playbook -i inventory/inventory.ini --become cluster.yml &>1 | tee /tmp/kuberspray.log
-    #   args:
-    #     chdir: /home/vagrant/kubespray
+    - name: install kubespray
+      become: true
+      become_user: vagrant
+      shell: |
+        ansible-playbook -i inventory/inventory.ini --become cluster.yml 2>&1 | tee /tmp/kuberspray.log
+      args:
+        chdir: /home/vagrant/kubespray
