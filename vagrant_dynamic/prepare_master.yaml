@@ -5,6 +5,11 @@
   become: yes
 
   tasks:
+    - name: Print extra vars
+      debug:
+        # nodes passed from Vagrantfile
+        var: nodes
+
     - name: Update and upgrade apt packages
       become: true
       apt:
@@ -22,18 +27,12 @@
           - lsb-release
         state: latest
 
-    - name: check if repo already cloned
-      stat:
-        path: /home/vagrant/kuber-setup
-      register: already_cloned
-
     - name: clone kuber-setup repo
       git:
         repo: https://github.com/terenty-rezman/kuber-setup.git
         dest: /home/vagrant/kuber-setup
         clone: yes
         update: yes
-      when: not already_cloned.stat.exists
 
     - name: create inventory.ini for kubespray
       template:

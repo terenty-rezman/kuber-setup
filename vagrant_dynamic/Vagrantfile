@@ -43,8 +43,6 @@ nodes.each_with_index do |node, idx|
   node[:ip] = ip
 end
 
-host_vars = {}
-
 
 Vagrant.configure("2") do |config|
   nodes.each_with_index do |node, idx|
@@ -84,9 +82,11 @@ Vagrant.configure("2") do |config|
 
     master.vm.synced_folder ".", "/vagrant", SharedFoldersEnableSymlinksCreate: false
 
-    master.vm.provision "shell", inline: $script, privileged: false
+    # master.vm.provision "shell", inline: $script, privileged: false
 
-    host_vars[:nodes] = nodes
+    host_vars = {}
+    # serialize to json
+    host_vars["master"] = { nodes: "'#{nodes.to_json}'" }
 
     master.vm.provision "ansible_local" do |ansible|
       ansible.host_vars = host_vars
