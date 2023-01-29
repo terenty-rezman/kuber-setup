@@ -52,10 +52,26 @@
       args:
         chdir: /home/vagrant/kuber-setup/vagrant_dynamic
 
+    - name: print info
+      ansible.builtin.debug:
+        msg: |
+          kubespray is installed next from master vm to nodes vms
+          to see ansible logs please use:
+          vagrant ssh master -c "tail -f /tmp/kubespray.log"
+      when: ansible_default_ipv4.gateway is defined
+
     - name: install kubespray
       become: true
       become_user: vagrant
       shell: |
-        ansible-playbook -i inventory/inventory.ini --become cluster.yml 2>&1 | tee /tmp/kuberspray.log
+        ansible-playbook -i inventory/inventory.ini --become cluster.yml 2>&1 | tee /tmp/kubespray.log
       args:
         chdir: /home/vagrant/kubespray
+
+    - name: postinstall actions for control nodes
+      become: true
+      become_user: vagrant
+      shell: |
+        ansible-playbook -i /home/vagrant/kubespray/inventory/inventory.ini --become control_nodes_postinstall.yaml 
+      args:
+        chdir: /home/vagrant/kuber-setup/vagrant_dynamic

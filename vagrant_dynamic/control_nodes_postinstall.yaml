@@ -1,0 +1,23 @@
+
+---
+- hosts: kube_control_plane
+  become: yes
+
+  tasks:
+    - name: Setup kubeconfig for user
+      become: true
+      become_user: vagrant
+      shell: |
+        mkdir -p /home/$USER/.kube
+        sudo cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
+        sudo chown $USER:$USER /home/$USER/.kube/config
+
+    - name: Add serve alias for foo user
+      ansible.builtin.lineinfile:
+        path: /home/vagrant/.bashrc
+        line: alias k=kubectl
+        owner: vagrant
+        regexp: '^alias serve=kubectl$'
+        state: present
+        insertafter: EOF
+        create: yes
