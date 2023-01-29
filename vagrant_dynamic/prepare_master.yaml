@@ -48,7 +48,7 @@
       become: true
       become_user: vagrant
       shell: |
-        ansible-playbook -i /home/vagrant/kubespray/inventory/inventory.ini --become prepare_nodes.yml 
+        ansible-playbook -i /home/vagrant/kubespray/inventory/inventory.ini --become prepare_nodes.yaml 
       args:
         chdir: /home/vagrant/kuber-setup/vagrant_dynamic
 
