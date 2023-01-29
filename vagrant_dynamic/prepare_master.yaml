@@ -5,9 +5,9 @@
   become: yes
 
   tasks:
-    - name: Print extra vars
+    - name: print host_vars
       debug:
-        # nodes passed from Vagrantfile
+        # variable nodes passed from Vagrantfile
         var: nodes
 
     - name: Update and upgrade apt packages
@@ -39,10 +39,10 @@
         src: /home/vagrant/kuber-setup/master/kubespray/inventory.j2
         dest: /home/vagrant/kubespray/inventory/inventory.ini
 
-    - name: copy kubespray inventory.ini
-      ansible.builtin.copy:
-        src: /home/vagrant/kuber-setup/master/kubespray/inventory.ini
-        dest: /home/vagrant/kubespray/inventory/inventory.ini
+    - name: create hosts
+      template:
+        src: /home/vagrant/kuber-setup/master/etc/hosts.j2
+        dest: /etc/hosts
 
     # - name: install kubespray
     #   become: true
