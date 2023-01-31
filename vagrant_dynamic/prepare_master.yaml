@@ -55,10 +55,7 @@
     - name: print info
       ansible.builtin.debug:
         msg: |
-          kubespray is installed next from master vm to nodes vms
-          to see ansible logs please use:
-          vagrant ssh master -c "tail -f /tmp/kubespray.log"
-      when: ansible_default_ipv4.gateway is defined
+          kubespray is being installed, to see ansible logs please use: vagrant ssh master -c 'tail -f /tmp/kubespray.log'
 
     - name: install kubespray
       become: true
