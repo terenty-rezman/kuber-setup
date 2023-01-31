@@ -7,7 +7,7 @@
     - name: Setup kubeconfig for user
       shell: |
         mkdir -p /home/vagrant/.kube
-        cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
+        cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
         chown vagrant:vagrant /home/vagrant/.kube/config
 
     - name: Add serve alias for foo user
